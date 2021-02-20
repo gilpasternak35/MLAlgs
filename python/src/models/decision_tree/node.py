@@ -5,6 +5,7 @@ from copy import copy, deepcopy
 from typing import Any, List, Union, Tuple, Dict
 
 import numpy as np
+import pandas as pd
 
 from python.src.models.utils.gini_impurity import GiniImpurity
 
@@ -20,13 +21,12 @@ class Node(object):
 
     def __init__(self, data: np.ndarray,
                  labels: np.ndarray,
-                 threshold: Union[float, int],
-                 class_state: int):
+                 class_state: int = 2):   # Note: class state initialized to 2 for root node as it does not have its own
         """Constructs a childless node given data and threshold"""
         self._left: Node = None
         self._right: Node = None
-        self._data = data
-        self._threshold = threshold
+        self._threshold = None
+        self._data = data.T
         self._class_state = class_state
         self._labels = labels
 
@@ -78,9 +78,9 @@ class Node(object):
             self._right = Node(data=child, class_state=self.RIGHT_CLASS)
 
     def __str__(self) -> str:
-        return f'Node with data: {str(self._data)}'
+        return f'Node with data: \n{str(self._data)}\n and labels \n{str(self._labels)}\n'
 
-    def _compute_threshold(self, _data: np.ndarray, _labels: np.ndarray) \
+    def _compute_threshold(self) \
             -> Dict[str, Union[Union[float, int, np.ndarray], Any]]:
         """Updates the threshold for this node"""
         optimal_cost = np.inf
@@ -88,13 +88,14 @@ class Node(object):
         optimal_indices_smaller = np.ndarray([])
         optimal_indices_larger = np.ndarray([])
 
-        for feature in _data[0]:
+        for feature in self._data:
             for i in range(self._FEATURE_RESAMPLES):
+                print(feature)
                 threshold = np.random.choice(feature, size=1)
                 indices_larger = np.where(feature >= threshold)
                 indices_smaller = np.where(feature < threshold)
-                impurity = GiniImpurity.compute(_labels[indices_larger],
-                                                _labels[indices_smaller])
+                impurity = GiniImpurity.compute(self._labels[indices_larger],
+                                                self._labels[indices_smaller])
                 if impurity < optimal_cost:
                     optimal_cost = impurity
                     optimal_threshold = threshold
@@ -114,9 +115,15 @@ class Node(object):
         cost, self._threshold, smaller_indices, larger_indices = \
             self._compute_threshold(self._data)
 
+        # for feature in self._data:
+        #     feature_under_threshold = []
+        #     feature_over_threshold = []
+        #     for i in range(len(feature)):
+        #         if i
+
+
         over_threshold = np.ndarray([])
         under_threshold = np.ndarray([])
-
 
         if remaining_depth > 0 and cost > self._COST_MIN:
 
@@ -129,3 +136,15 @@ class Node(object):
         else:
             # this is a leaf representing a class. ...return?
             return self
+
+
+if __name__ == "__main__":
+    data = pd.DataFrame({"feature1": [1,3,3,4,5,6,7],
+                         "feature2": [0,0,0,0,0,0,0],
+                         "feature3": [1,1,1,1,2,2,2],
+                         "feature4": [1,2,2,7,7,7,7]})
+    labels = pd.Series([0,0,1,1,1,1,1])
+    nd = Node(data=data.to_numpy(), labels=labels.to_numpy())
+    print(nd)
+    print(nd._compute_threshold(_data=data.to_numpy().T, _labels=labels.to_numpy()))
+

@@ -17,10 +17,14 @@ class DecisionTree(object):
                  data: np.ndarray,
                  labels: np.ndarray,
                  depth: Union[str, int] = 'random',
-                 cost: Cost = 'gini'):
+                 cost: Cost = 'gini',
+                 cost_min: float = 0.05,
+                 feature_resamples: int = 10):
         # TODO :: arbitrary depth
         #      range: [3, min(len(data)//2, 10]
         self._root: Node = Node()
+        setattr(self._root, "_COST_MIN", cost_min)
+        setattr(self._root, "_FEATURE_RESAMPLES", feature_resamples)
         if isinstance(depth, str):
             raise ValueError("HEy You we didn't do this yet. Chill bro.")
         else:
