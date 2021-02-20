@@ -64,7 +64,9 @@ class Node(object):
             self._right = Node(class_state=child)
 
     def __str__(self) -> str:
-        return f'Node with state: {self._class_state} and threshold {str(self._threshold)}\n'
+        return f'Node with state: {self._class_state} -- Threshold' \
+               f' {str(self._threshold)} -- Left: {str(self._left)} --' \
+               f'Right: {str(self._right)}\n'
 
     def _compute_threshold(self, data: np.ndarray, labels: np.ndarray) \
             -> Dict[str, Union[Union[float, int, np.ndarray], Any]]:
@@ -116,6 +118,7 @@ class Node(object):
         if remaining_depth > 0 and len(labels) > 1:
 
             # If shape of data does not match expected label length, transposing
+            # print(f'data: \n{data}')
             if len(data[0]) != len(labels):
                 data = data.T
 
@@ -124,7 +127,7 @@ class Node(object):
                 self._compute_threshold(data, labels).values()
 
             # If we have reached optimal value, this will be our last split
-            if cost > self._COST_MIN:
+            if cost <= self._COST_MIN:
                 remaining_depth = 1
 
             # Numpy splitting along column axis
@@ -134,15 +137,19 @@ class Node(object):
             labels_over_threshold = labels[larger_indices]
 
             # If no new_left and new_right have been initialized, building Nodes
-            if self._left is None:
+            if self._left is None and len(labels_under_threshold > 0):
                 mode = stats.mode(labels_under_threshold).mode[0]
                 self.set_left(mode)
                 print(f'Left Node: {self} -- Mode: {mode} -- State:'
                       f' {self._left._class_state}')
+            else:
+                return self
 
-            if self._right is None:
+            if self._right is None and len(labels_over_threshold > 0):
                 mode = stats.mode(labels_over_threshold).mode[0]
                 self.set_right(mode)
+            else:
+                return self
 
             self._left.split(data=data_over_threshold,
                              labels=labels_over_threshold,
