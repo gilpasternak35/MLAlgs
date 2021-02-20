@@ -6,9 +6,6 @@ from python.src.models.utils.cost import Cost
 class GiniImpurity(Cost):
     """Represents Gini Impurity as a cost metric"""
 
-    def __init__(self):
-        pass
-
     @staticmethod
     def _value_counts(node: List[Any]) -> List[int]:
         """Computes counts of unique values in a list"""
@@ -26,18 +23,19 @@ class GiniImpurity(Cost):
         sum_ = 0
 
         for count in counts:
-            sum_ += ((count * 1.0) / length)**2
+            sum_ += ((count * 1.0) / length) ** 2
 
         return 1 - sum_
 
-    def compute(self, *labels, **kwargs) -> float:
+    @staticmethod
+    def compute(*labels, **kwargs) -> float:
         """Computes GiniImpurity"""
         impurity_sum = 0
         total_length = sum(map(len, labels))
 
         for label in labels:
-            counts = self._value_counts(label)
-            impurity = self._compute_impurity(counts)
+            counts = GiniImpurity._value_counts(label)
+            impurity = GiniImpurity._compute_impurity(counts)
             impurity_sum += impurity * (len(label) / total_length)
 
         return impurity_sum
