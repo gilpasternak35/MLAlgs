@@ -1,23 +1,20 @@
 from __future__ import annotations
 
 import logging
-from copy import copy, deepcopy
-from typing import Any, List, Union, Tuple, Dict
+from copy import copy
+from typing import Any, Union, Dict
 
 import numpy as np
-import pandas as pd
+import scipy.stats as stats
 
 from python.src.models.utils.gini_impurity import GiniImpurity
-
-import scipy.stats as stats
 
 log = logging.getLogger(__name__)
 
 
 class Node(object):
     """Represents a single node in a tree"""
-    RIGHT_CLASS = 1
-    LEFT_CLASS = 0
+
     _COST_MIN = 0.05
     _FEATURE_RESAMPLES = 10
     _ROOT_CLASS_STATE = 2
@@ -64,7 +61,7 @@ class Node(object):
                 log.warn(f'Overwriting left child {self._right} of {self}')
             self._right = child
         else:
-            self._right = Node(class_state= child)
+            self._right = Node(class_state=child)
 
     def __str__(self) -> str:
         return f'Node with state: {self._class_state} and threshold {str(self._threshold)}\n'
@@ -81,7 +78,8 @@ class Node(object):
         for feature in data:
             for i in range(self._FEATURE_RESAMPLES):
                 threshold = np.random.choice(feature, size=1)
-                indices_larger = np.where(feature >= threshold)[0]  # Todo: find a more elegant way to do this
+                indices_larger = np.where(feature >= threshold)[
+                    0]  # Todo: find a more elegant way to do this
                 indices_smaller = np.where(feature < threshold)[0]
                 impurity = GiniImpurity.compute(labels[indices_larger],
                                                 labels[indices_smaller])
@@ -102,17 +100,18 @@ class Node(object):
 
     def predict_class(self, data: Any):
         """Binary tree traversal returning class for binary tree classifier"""
-        if self._splitting_feature is None or data[self._splitting_feature] >= self._threshold:
-            return self._class_state if self._right is None else self._right.predict_class(data)
+        if (self._splitting_feature is None
+                or data[self._splitting_feature] >= self._threshold):
+            return (self._class_state if self._right is None
+                    else self._right.predict_class(data))
         else:
-            return self._class_state if self._left is None else self._left.predict_class(data)
-
+            return self._class_state if self._left is None else self._left.predict_class(
+                data)
 
     def split(self, data: np.ndarray,
               labels: np.ndarray,
               remaining_depth: int) -> Node:
         """Split nodes"""
-        setattr(self, '_class_state', stats.mode(labels).mode[0])
         # While we haven't reached optimal, maximum depth, or empty data
         if remaining_depth > 0 and len(labels) > 1:
 
@@ -136,19 +135,24 @@ class Node(object):
 
             # If no new_left and new_right have been initialized, building Nodes
             if self._left is None:
-                self.set_left(stats.mode(labels_under_threshold).mode[0])
+                mode = stats.mode(labels_under_threshold).mode[0]
+                self.set_left(mode)
+                print(f'Left Node: {self} -- Mode: {mode} -- State:'
+                      f' {self._left._class_state}')
 
             if self._right is None:
-                self.set_right(stats.mode(labels_over_threshold).mode[0])
+                mode = stats.mode(labels_over_threshold).mode[0]
+                self.set_right(mode)
 
             self._left.split(data=data_over_threshold,
                              labels=labels_over_threshold,
-                             remaining_depth= remaining_depth - 1)
+                             remaining_depth=remaining_depth - 1)
             # right:
             self._right.split(data=data_under_threshold,
                               labels=labels_under_threshold,
-                              remaining_depth= remaining_depth - 1)
+                              remaining_depth=remaining_depth - 1)
 
         # Propagating back root node
+        print(f'Node getting returned: {self} -- Left: {str(self._left)} -- '
+              f'Right: {str(self._right)}')
         return self
-

@@ -26,7 +26,8 @@ class DecisionTree(object):
 
         # Random depth computation
         if str(depth) == 'random':
-            self.depth = np.random.choice(np.arange(1, min(len(labels) // 2, 10)), 1)[0]
+            self.depth = \
+                np.random.choice(np.arange(1, min(len(labels) // 2, 10)), 1)[0]
         else:
             self.depth = depth
 
@@ -37,6 +38,7 @@ class DecisionTree(object):
     def train(self):
         """Trains this decision tree"""
         self._root = self._root.split(self._data, self._labels, self.depth)
+        self._root
 
     def predict(self, data: np.ndarray) -> np.ndarray:
         """Traverses through tree and returns class prediction for every record"""
@@ -56,19 +58,17 @@ if __name__ == "__main__":
     # tree.train()
     # print(tree.predict([[4, 6, 7, 9],
     #                     [1, 6, 7, 10]]))
+    # Height
+    data_ = np.array([[5.9, 5.0, 6.2, 5.9, 5.4, 5.3, 6.6, 5.5],
+                      # Weight
+                      [122.2, 105.2, 180.0, 122.2, 120.1, 110.0, 190.0, 150.1],
+                      # Plays basketball?
+                      [1, 0, 1, 1, 0, 0, 1, 0]])
+    labels_ = np.array([1,2, 1, 2, 1, 2, 2, 2])
 
-    tree = DecisionTree(data=np.array([[5.9, 5.0, 6.2, 5.9, 5.4, 5.3, 5.7, 5.5, 5.9, 5.0, 6.2, 5.9, 5.4, 5.3, 5.7, 5.5], # Height
-                                       [160.0, 105.2, 180.0, 122.2, 120.1, 110.0, 190.0, 150.1, 160.0, 105.2, 180.0, 122.2, 120.1, 110.0, 190.0, 150.1], # Weight
-                                       [1,0, 1, 1, 0, 0, 1, 0, 1,0, 1, 1, 0, 0, 1, 0]]), # Plays basketball?
-                        labels=np.array([0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1]))
+    tree = DecisionTree(data=data_, labels=labels_)
     tree.train()
-    class_dict = {0:"man", 1: "woman"}
-    pred = tree.predict([[6.2, 175, 1],
-                        [5.3, 115, 0]])
+    class_dict = {1: "man", 2: "woman"}
+    pred = tree.predict([[5.7, 160, 1]])
     for val in pred:
         print(class_dict[val])
-
-
-
-
-
