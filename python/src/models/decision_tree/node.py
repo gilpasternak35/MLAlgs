@@ -9,6 +9,8 @@ import pandas as pd
 
 from python.src.models.utils.gini_impurity import GiniImpurity
 
+import scipy.stats as stats
+
 log = logging.getLogger(__name__)
 
 
@@ -44,10 +46,8 @@ class Node(object):
             if self._left is not None:
                 log.warn(f'Overwriting left child {self._left} of {self}')
             self._left = child
-            # TODO :: replace this w/ better method once figured out
-            setattr(self._left, '_class_state', self.LEFT_CLASS)
         else:
-            self._left = Node(class_state=self.LEFT_CLASS)
+            self._left = Node(class_state=child)
 
     @property
     def right(self) -> Node:
@@ -63,10 +63,8 @@ class Node(object):
             if self._right is not None:
                 log.warn(f'Overwriting left child {self._right} of {self}')
             self._right = child
-            # TODO :: replace this w/ better method once figured out
-            setattr(self._right, '_class_state', self.RIGHT_CLASS)
         else:
-            self._right = Node(class_state=self.RIGHT_CLASS)
+            self._right = Node(class_state= child)
 
     def __str__(self) -> str:
         return f'Node with state: {self._class_state} and threshold {str(self._threshold)}\n'
@@ -89,7 +87,7 @@ class Node(object):
                                                 labels[indices_smaller])
                 if impurity < optimal_cost:
                     optimal_cost = impurity
-                    optimal_feature = data.index(feature)
+                    optimal_feature = np.where(data == feature)[0]
                     optimal_threshold = threshold
                     optimal_indices_smaller = indices_smaller
                     optimal_indices_larger = indices_larger
@@ -104,16 +102,17 @@ class Node(object):
 
     def predict_class(self, data: Any):
         """Binary tree traversal returning class for binary tree classifier"""
-        if data[self._splitting_feature] >= self._threshold:
+        if self._splitting_feature is None or data[self._splitting_feature] >= self._threshold:
             return self._class_state if self._right is None else self._right.predict_class(data)
         else:
             return self._class_state if self._left is None else self._left.predict_class(data)
 
 
-    def split(self, remaining_depth: int, data: np.ndarray,
-              labels: np.ndarray) -> Node:
+    def split(self, data: np.ndarray,
+              labels: np.ndarray,
+              remaining_depth: int) -> Node:
         """Split nodes"""
-
+        setattr(self, '_class_state', stats.mode(labels).mode[0])
         # While we haven't reached optimal, maximum depth, or empty data
         if remaining_depth > 0 and len(labels) > 1:
 
@@ -137,18 +136,18 @@ class Node(object):
 
             # If no new_left and new_right have been initialized, building Nodes
             if self._left is None:
-                self.set_left(self.LEFT_CLASS)
+                self.set_left(stats.mode(labels_under_threshold).mode[0])
 
             if self._right is None:
-                self.set_right(self.RIGHT_CLASS)
+                self.set_right(stats.mode(labels_over_threshold).mode[0])
 
-            self._left.split(remaining_depth - 1,
-                             data=data_over_threshold,
-                             labels=labels_over_threshold)
+            self._left.split(data=data_over_threshold,
+                             labels=labels_over_threshold,
+                             remaining_depth= remaining_depth - 1)
             # right:
-            self._right.split(remaining_depth - 1,
-                              data=data_under_threshold,
-                              labels=labels_under_threshold)
+            self._right.split(data=data_under_threshold,
+                              labels=labels_under_threshold,
+                              remaining_depth= remaining_depth - 1)
 
         # Propagating back root node
         return self
