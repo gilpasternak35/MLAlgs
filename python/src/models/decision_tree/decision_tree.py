@@ -36,15 +36,20 @@ class DecisionTree(object):
 
     def train(self):
         """Trains this decision tree"""
-        # TODO :: split nodes & preserve own structure
-        #       When splitting, nodes persist w/ a threshold. thus nodes
-        #       need a threshold.***
-        # TODO :: calculate threshold... somewhere. Stop when depth == max
-        #  OR some arbitrarily small gini impurity
-        self._root.split(self._max_depth, self._data, self._labels)
-        # TODO :: returns ... ?
+        self._root = self._root.split(self._data, self._labels, self._max_depth)
+        return self
 
     def predict(self, data: np.ndarray) -> np.ndarray:
-        """TODO :: implement"""
-        pass
+        """Traverses through tree and returns class prediction for every record"""
+        predictions = []
+        for record in data:
+            predictions.append(self._root.predict_class(record))
+
+        return predictions
+
+
+if __name__ == "__main__":
+    tree = DecisionTree()
+
+
 

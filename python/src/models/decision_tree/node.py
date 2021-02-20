@@ -26,6 +26,7 @@ class Node(object):
         self._left: Node = None
         self._right: Node = None
         self._threshold = None
+        self._splitting_feature = None
         self._class_state = class_state
 
     @property
@@ -75,12 +76,12 @@ class Node(object):
         """Updates the threshold for this node"""
         optimal_cost = np.inf
         optimal_threshold = 0
+        optimal_feature = 0
         optimal_indices_smaller = np.ndarray([])
         optimal_indices_larger = np.ndarray([])
 
         for feature in data:
             for i in range(self._FEATURE_RESAMPLES):
-                print(feature)
                 threshold = np.random.choice(feature, size=1)
                 indices_larger = np.where(feature >= threshold)[0]  # Todo: find a more elegant way to do this
                 indices_smaller = np.where(feature < threshold)[0]
@@ -88,6 +89,7 @@ class Node(object):
                                                 labels[indices_smaller])
                 if impurity < optimal_cost:
                     optimal_cost = impurity
+                    optimal_feature = data.index(feature)
                     optimal_threshold = threshold
                     optimal_indices_smaller = indices_smaller
                     optimal_indices_larger = indices_larger
@@ -95,9 +97,18 @@ class Node(object):
         return {
             'cost': optimal_cost,
             'threshold': optimal_threshold[0],
+            'splitting_feature': optimal_feature[0],
             'smaller': optimal_indices_smaller,
             'larger': optimal_indices_larger
         }
+
+    def predict_class(self, data: Any):
+        """Binary tree traversal returning class for binary tree classifier"""
+        if data[self._splitting_feature] >= self._threshold:
+            return self._class_state if self._right is None else self._right.predict_class(data)
+        else:
+            return self._class_state if self._left is None else self._left.predict_class(data)
+
 
     def split(self, remaining_depth: int, data: np.ndarray,
               labels: np.ndarray) -> Node:
@@ -111,7 +122,7 @@ class Node(object):
                 data = data.T
 
             # If nonempty, compute thresholds for split
-            cost, self._threshold, smaller_indices, larger_indices = \
+            cost, self._threshold, self._splitting_feature, smaller_indices, larger_indices = \
                 self._compute_threshold(data, labels).values()
 
             # If we have reached optimal value, this will be our last split
@@ -142,14 +153,3 @@ class Node(object):
         # Propagating back root node
         return self
 
-
-if __name__ == "__main__":
-    data = pd.DataFrame({"feature1": [1, 3, 3, 4, 5, 6, 7],
-                         "feature2": [0, 0, 0, 0, 0, 0, 0],
-                         "feature3": [1, 1, 1, 1, 2, 2, 2],
-                         "feature4": [1, 2, 2, 7, 7, 7, 7]})
-    labels = pd.Series([0, 0, 1, 1, 1, 1, 1])
-    nd = Node(class_state=2)
-    print(nd)
-    tree = nd.split(data=data.to_numpy(), labels=labels.to_numpy(), remaining_depth=5)
-    print(tree)
