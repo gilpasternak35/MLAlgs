@@ -5,6 +5,7 @@ from typing import Any, Iterator
 import numpy as np
 
 from src.utils.distance import Distance
+from src.utils.euclidean_distance import Euclidean
 from src.utils.labeled_point import LabeledPoint
 from src.utils.labeled_point_list import LabeledPointList
 
@@ -22,10 +23,14 @@ class ClusterList(Iterable):
     def clusters(self):
         return copy.deepcopy(self.clusters)
 
+    @property
+    def representatives(self):
+        return [cluster.representative for cluster in self.clusters]
+
     def get_cluster(self, cluster_representative: Any):
         """Returns first matching instance with identical cluster representative"""
-        matching =  [cluster for cluster in self.clusters if cluster.representative == cluster_representative]
-        if len(matching > 0):
+        matching = [cluster for cluster in self.clusters if cluster.representative == cluster_representative]
+        if len(matching) > 0:
             return matching[0]
         else:
             return None
@@ -55,7 +60,7 @@ class ClusterList(Iterable):
         """Sets the cluster representative to be the mean of that cluster"""
         self.modify_cluster_representative(cluster_representative, self.compute_cluster_mean(cluster_representative))
 
-    def assign_point_to_nearest_cluster(self, point: LabeledPoint, distance: Distance):
+    def assign_point_to_nearest_cluster(self, point: LabeledPoint, distance: Distance = Euclidean):
         """Assigns point to nearest cluster based on distance from representative"""
         closest = {'distance': None, 'centroid': None}
         for cluster in self.clusters:

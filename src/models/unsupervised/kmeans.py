@@ -10,9 +10,10 @@ from src.utils.euclidean_distance import Euclidean
 from src.utils.labeled_point import LabeledPoint
 from src.utils.labeled_point_list import LabeledPointList
 
-# Todo: complete the fit method
+
 class KMeans(UnsupervisedBaseClassifier):
     """An implementation of the unsupervised KMeans Clustering algorithm"""
+
     DISTANCES = {
         'euclidean': Euclidean.distance,
     }
@@ -26,20 +27,41 @@ class KMeans(UnsupervisedBaseClassifier):
                           else self.DISTANCES.get(distance, 'euclidean'))
 
         # We should store this so that trained model may predict centroid assignment
-        self._final_centroids = None
+        self._final_cluster_list = None
 
     def fit(self, point_set: Any) -> UnsupervisedBaseClassifier:
         """Fit the classifier to new data"""
-        # Randomly initialize centroids as LabeledPoints
-        # Builds a LabeledPointList named centroids
+
+        # Generate centroids at random positions
         generated_centroids = [LabeledPointList(representative=vec) for vec in
                                 point_set[np.random.choice(len(point_set), self._k_centroids)]]
+
         cluster_list = ClusterList(generated_centroids)
+        has_converged = False
 
         # For convergence checks
-        previous_cluster_representatives = np.array([])
+        while not has_converged:
+            # Assigning each point to nearest cluster
+            for point in point_set:
+                cluster_list.assign_point_to_nearest_cluster(LabeledPoint(point, -1))
 
-        return 0
+            # Obtaining previous representatives prior to update
+            previous_representatives = cluster_list.representatives
+
+            # Reassigning clusters
+            self._update_centroids(cluster_list)
+
+            # Obtaining current representatives post update
+            current_representatives = cluster_list.representatives
+
+            # Testing for convergence
+            has_converged = self._has_converged(previous_representatives, current_representatives)
+
+        # Maintaining final_cluster_list for prediction purposes
+        self._final_cluster_list = cluster_list
+
+        # Returning classifier, whose final cluster list we can access
+        return self
 
     def _update_centroids(self, cluster_list: ClusterList):
         """Setting all cluster centroids to be the mean of all of their assigned points"""
@@ -47,21 +69,14 @@ class KMeans(UnsupervisedBaseClassifier):
             cluster_list.set_cluster_representative_as_mean(cluster.representative)
 
     @staticmethod
-    def _has_converged(last_centroids: np.array, current_centroids: np.array) -> bool:
+    def _has_converged(previous_centroids: np.array, current_centroids: np.array) -> bool:
         """Checks if has converged by comparing previous and current centroids"""
-        has_converged = True
-        for prev_centroid, cur_centroid in zip(last_centroids, current_centroids):
-            has_converged = has_converged and prev_centroid == cur_centroid
-
-            # Returning immediately if false
-            if not has_converged:
-                return has_converged
-
-        return has_converged
-
+        # Testing positional equality for all vectors, then ensuring all vectors have all identical position
+        return all([all(current == previous)
+                    for current, previous in zip(previous_centroids, current_centroids)])
 
     def predict(self, data) -> np.ndarray:
-        """Predict on new data"""
+        """Predict cluster representative of new data"""
         label_predictions = np.array([])
 
         # If 1D array, nesting in array so as to traverse "once" and return single prediction
@@ -74,20 +89,10 @@ class KMeans(UnsupervisedBaseClassifier):
                 # Building labeled point
                 vector_as_point = LabeledPoint(vector, -1)
 
-                # Assigning vector to centroid
-                # Todo: update to cluster methodology - store the representative
-                self.assign(vector_as_point, self._final_centroids)
+                # Computing proper centroid for labeledpoint
+                self._final_cluster_list.assign_point_to_nearest_cluster(vector_as_point)
 
-                # appending to label_predictions
+                # appending representative by obtaining new label of point
                 label_predictions = np.append(label_predictions, vector_as_point.label)
 
         return label_predictions
-
-
-
-
-
-
-
-
-
