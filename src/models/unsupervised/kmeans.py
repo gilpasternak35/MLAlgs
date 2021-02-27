@@ -27,7 +27,7 @@ class KMeans(UnsupervisedBaseClassifier):
         # We should store this so that trained model may predict centroid assignment
         self._final_centroids = None
 
-    def _assign(self, point: LabeledPoint, centroids: np.array):
+    def _assign(self, point: LabeledPoint, centroids: np.array, centroid_cluster_list: LabeledPointList):
         """Assigns a labeled point to a cluster"""
         # Todo: complete this tomorrow morning
         # define centroid list for each centroid
@@ -41,9 +41,10 @@ class KMeans(UnsupervisedBaseClassifier):
                     or distance < closest.get('distance')):
                 closest.update({'distance': distance, 'centroid': centroid})
         # set label to label of the closest centroid
+
         point.label = closest.get('centroid').label
 
-    def fit(self, features: Any) -> UnsupervisedBaseClassifier:
+    def fit(self, point_set: Any) -> UnsupervisedBaseClassifier:
         """Fit the classifier to new data"""
         # Data structure. Centroid labels are keys. Index by centroid,
         # then ['centroid'] or ['cluster'] to get relevant data
@@ -55,37 +56,27 @@ class KMeans(UnsupervisedBaseClassifier):
         # }
 
         # Randomly initialize centroids as LabeledPoints
-        centroid_vectors = [LabeledPoint(vec, label) for vec, label in
-                            [np.random.choice(features,self._k_centroids)]]
-        data = {
-            k: {
-                'centroid': centroid_vectors[k],
-                'cluster': LabeledPointList(),
-            }
-            for k in range(self._k_centroids)
-        }
+        # Builds a LabeledPointList named centroids
+        generated_centroids = [LabeledPointList(representative=vec) for vec in
+                               point_set[np.random.choice(len(point_set), self._k_centroids)]]
 
-        feature_points = [LabeledPoint(feature, -1) for feature in features]
+        # Each centroid will have a cluster_list, represented by the centroid with data points as the elements
+        centroid_cluster_list = np.array(generated_centroids)
+
+        feature_points = [LabeledPoint(feature, -1) for feature in point_set]
         has_converged = False
+
         # Iterate on:
         while not has_converged:
-            # TODO :: This is a mapping from cluster labels to an array.
-            #   Each time a vector is added to a cluster, sum it w/ the
-            #   running total of vectors in that cluster. Average the final
-            #   number.
-            #   BENEFIT :: We compute mean(cluster) in the same iteration as
-            #      assign(data), rather than an additional O(n*k) loop to
-            #       average each cluster
-            centroid_means: Dict[int, np.array] = {
-                k: np.array() for k in range(self._k_centroids)}
-            current_centroids = [data[k].get('centroid') for k in data]
+            # Building representative list
+            current_centroids = [cluster.representative for cluster in centroid_cluster_list]
 
             # Assign points to centroids using Euclidean distance minimizer
             for feature in feature_points:
-                self._assign(feature, current_centroids)
+                self._assign(feature, current_centroids, centroid_cluster_list)
                 centroid_means[feature.label] += feature.vector
 
-            # TODO :: a more accurate/correct cluster mean @Gil
+            # computing mean and assigning to computed_centroid_means dictionary
             computed_centroid_means = {
                 k: vector_sum.mean()
                 for k, vector_sum in centroid_means.items()
@@ -95,14 +86,15 @@ class KMeans(UnsupervisedBaseClassifier):
             last_centroids = {point.label: point.vector for point
                               in current_centroids}
             self._update_centroids(current_centroids, computed_centroid_means)
-            # TODO :: Less exact convergence?
+
+            # Since algorithm guaranteed to converge
             has_converged = self._has_converged(last_centroids, data)
 
         # Upon convergence, return centroids (when centroids didn't move
         # previous iteration)
         self._final_centroids = current_centroids
-        # TODO :: output type is open to change. This just seemed close enough.
-        #       @Gil --jesse
+
+        # Returning centroids
         return enumerate(map(lambda k: data[k].get('centroid'), data))
 
     def _update_centroids(self, centroids, computed_centroid_means):
@@ -141,7 +133,7 @@ class KMeans(UnsupervisedBaseClassifier):
                 self.assign(vector_as_point, self._final_centroids)
 
                 # appending to label_predictions
-                label_predictions = np.append(label_predictions, vector_as_point.vector)
+                label_predictions = np.append(label_predictions, vector_as_point.label)
 
         return label_predictions
 
