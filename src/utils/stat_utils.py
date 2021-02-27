@@ -21,3 +21,4 @@ def mode(values: Iterable[Any], axis: int = 0):
                else value for value in values]
     return max(value_counts(on_axis), key=lambda count: count[-1])[0]
 
+

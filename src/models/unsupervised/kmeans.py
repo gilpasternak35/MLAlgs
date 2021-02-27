@@ -24,6 +24,9 @@ class KMeans(UnsupervisedBaseClassifier):
         self._distance = (distance if isinstance(distance, Distance)
                           else self.DISTANCES.get(distance, 'euclidean'))
 
+        # We should store this so that trained model may predict centroid assignment
+        self._final_centroids = None
+
     def _assign(self, point: LabeledPoint, centroids: np.array):
         """Assigns a labeled point to a cluster"""
         # Todo: complete this tomorrow morning
@@ -53,8 +56,7 @@ class KMeans(UnsupervisedBaseClassifier):
 
         # Randomly initialize centroids as LabeledPoints
         centroid_vectors = [LabeledPoint(vec, label) for vec, label in
-                            enumerate(np.random.choice(features,
-                                                       self._k_centroids))]
+                            [np.random.choice(features,self._k_centroids)]]
         data = {
             k: {
                 'centroid': centroid_vectors[k],
@@ -98,6 +100,7 @@ class KMeans(UnsupervisedBaseClassifier):
 
         # Upon convergence, return centroids (when centroids didn't move
         # previous iteration)
+        self._final_centroids = current_centroids
         # TODO :: output type is open to change. This just seemed close enough.
         #       @Gil --jesse
         return enumerate(map(lambda k: data[k].get('centroid'), data))
@@ -122,7 +125,16 @@ class KMeans(UnsupervisedBaseClassifier):
 
     def predict(self, data) -> np.ndarray:
         """Predict on new data"""
-        pass
+        labeled_outputs = np.array([])
+        # If 1D array, returning single prediction
+        if len(data.shape) == 1:
+        # Otherwise, traversing through vectors, creating point, and assigning
+        else:
+            for vector in data:
+                vector_as_point = LabeledPoint(vector, -1)
+
+
+
 
 
 

@@ -15,22 +15,25 @@ class LabeledPointList(Iterable):
         pass
 
     def __init__(self, points: np.array = None):
-        # TODO :: Must define a LabeledPoint.__eq__() method for this to work
         self._elements = np.array([]) if points is None else points
 
     @property
     def points(self) -> List[LabeledPoint]:
+        """Returns copy of points in list"""
         return deepcopy(self._elements)
 
     def insert(self, vec: LabeledPoint) -> None:
+        """Inserts element to labeled point list"""
         self._elements = np.append(self._elements, vec)
 
     def remove(self, element: LabeledPoint):
-        # TODO :: numpy makes u write yourself
-        pass
+        """Removes element from a labeled point list"""
+        # Deleting point from array
+        np.delete(self._elements, element)
 
-    def mean(self, axis: int = 0) -> np.array:
-        # TODO :: gil, check me here
-        return self._elements.mean(axis=axis)
+    def vector_mean(self, axis: int = 0) -> np.array:
+        """Computes and returns vector mean"""
+        # Computing mean of the vector, along 0th axis
+        return np.mean(self._elements, axis=0)
 
 
