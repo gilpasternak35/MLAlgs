@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+from copy import deepcopy
 from typing import Any
 
 import numpy as np
@@ -8,20 +10,38 @@ from src.utils.distance import Distance
 
 class LabeledPoint:
     """Represents a point in Euclidean / multi-dimensional space"""
-    def __init__(self, vector: np.array, label: Any):
+
+    def __init__(self, vector: np.array, label: np.array):
         self._vector = vector
         self._label = label
 
+    def __eq__(self, o: object) -> bool:
+        return (isinstance(o, LabeledPoint)
+                and self.vector == o.vector
+                and self.label == o.label)
+
     @property
     def vector(self) -> np.array:
-        return self._vector
+        """Returns a copy of this point's vector.
+        NOTE :: Changes made to the copy are not reflected by the original
+        object.
+        """
+        return deepcopy(self._vector)
+
+    @vector.setter
+    def vector(self, new_vec: np.array) -> None:
+        self._vector = new_vec
 
     @property
     def label(self) -> np.array:
-        return self._label
+        """Returns a copy of this point's label.
+        NOTE :: Changes made to the copy are not reflected by the original
+        object.
+        """
+        return deepcopy(self._label)
 
     @label.setter
-    def update_label(self, new_label: Any):
+    def label(self, new_label: Any):
         self._label = new_label
 
     def distance(self, other_point: LabeledPoint, distance: Distance) -> float:
