@@ -22,8 +22,9 @@ class KMeans(UnsupervisedBaseClassifier):
 
     def _assign(self, point: np.array, centroids: np.array):
         # Todo: complete this tomorrow morning
-        # compute distance from centroids by passing in euclidean distance
-        distances = [point.distance(centroid, self._distance) for centroid in centroids]
+        # define centroid list for each centroid
+        # Keep track of which centroids have been assigned where via mutation
+
 
         # set label to label of the closest centroid
 

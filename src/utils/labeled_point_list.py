@@ -13,3 +13,4 @@ class LabeledPointList:
     def mean(self) -> np.array():
         pass
 
+
