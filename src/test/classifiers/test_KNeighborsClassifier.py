@@ -3,7 +3,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from src.models.supervised.classifier.knn.KNeighborsClassifier import \
+from src.models.supervised.classifier.knn.k_neighbors_classifier import \
     KNeighborsClassifier
 
 
