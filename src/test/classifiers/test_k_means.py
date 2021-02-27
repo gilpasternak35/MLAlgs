@@ -26,27 +26,23 @@ class TestKNeighborsClassifier(TestCase):
             [0, 2, 4]])
 
         model = KMeans(k_centroids=2, distance="euclidean")
-        cluster_values = model.fit(points)
-        test_cluster_1 = np.array([77, 55, 68])
-        test_big = np.array([1,2,3])
+        model = model.fit(points)
+        cluster_predictions = model.predict([[0, 1, 1], [94, 95, 92], [17, 12, 11]])
 
-
-        self.assertEqual(SMALL, model.predict(test_small))
-        self.assertEqual(BIG, model.predict(test_big))
+        self.assertEqual(cluster_predictions, np.array([[0, 1, 1.5], [95, 95, 95], [0, 1, 1.5]]))
 
     def test_point_cluster_2(self):
         """More complex test case"""
-        import pandas as pd
-        df = pd.read_csv('~/Documents/Projects/MLAlgs/SyntheticDataset.csv')
-        features = df[['Weight(Pounds)']].to_numpy()
-        labels = df['Gender'].to_numpy()
+        points = np.array([
+            [0, 1, 15, 12, 8, 4],
+            [0, 1, 15, 4, 12, 2],
+            [0, 0, 0, 1, 1, 1],
+            [0, 0, 0, 1, 1, 2],
+            [94, 92, 57, 92, 92, 92],
+            [94, 91, 52, 91, 93, 92]])
 
-        model = KMeans()
-        model = model.fit(features, labels)
+        model = KMeans(k_centroids=3, distance="euclidean")
+        model = model.fit(points)
+        cluster_predictions = model.predict([[0, 1, 14, 12, 7, 2], [94, 92, 52, 91, 93, 92], [[1, 0, 0, 1, 1, 2]]])
 
-        gender_map = {0: 'male', 1: 'female'}
-        vector = namedtuple('vector', ['features', 'label'])
-        jesse = vector(np.array([133]), 0)
-        gil = vector(np.array([175]), 0)
-        self.assertEqual(model.predict(gil.features), gil.label)
-        self.assertEqual(model.predict(jesse.features), jesse.label)
+        self.assertEqual(cluster_predictions, np.array([[0, 1, 15, 8, 10, 3],[94, 91.5, 54.5, 91.5, 92.5, 92], [0, 0, 0, 1, 1, 1.5]]))

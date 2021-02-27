@@ -46,13 +46,13 @@ class KMeans(UnsupervisedBaseClassifier):
                 cluster_list.assign_point_to_nearest_cluster(LabeledPoint(point, -1))
 
             # Obtaining previous representatives prior to update
-            previous_representatives = cluster_list.representatives
+            previous_representatives = cluster_list.representatives()
 
             # Reassigning clusters
             self._update_centroids(cluster_list)
 
             # Obtaining current representatives post update
-            current_representatives = cluster_list.representatives
+            current_representatives = cluster_list.representatives()
 
             # Testing for convergence
             has_converged = self._has_converged(previous_representatives, current_representatives)
@@ -66,7 +66,7 @@ class KMeans(UnsupervisedBaseClassifier):
     def _update_centroids(self, cluster_list: ClusterList):
         """Setting all cluster centroids to be the mean of all of their assigned points"""
         for cluster in cluster_list:
-            cluster_list.set_cluster_representative_as_mean(cluster.representative)
+            cluster_list.set_cluster_representative_as_mean(cluster.get_representative())
 
     @staticmethod
     def _has_converged(previous_centroids: np.array, current_centroids: np.array) -> bool:

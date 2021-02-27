@@ -23,11 +23,9 @@ class LabeledPointList(Iterable):
         """Returns copy of points in list"""
         return deepcopy(self._elements)
 
-    @property
-    def representative(self):
-        return deepcopy(self.representative)
+    def get_representative(self):
+        return deepcopy(self._representative)
 
-    @representative.setter
     def set_representative(self, new_representative):
         self._representative = new_representative
 
@@ -44,8 +42,10 @@ class LabeledPointList(Iterable):
     def vector_mean(self, axis: int = 0) -> np.array:
         """Computes and returns vector mean"""
         # Computing mean of the vector, along 0th axis
-        sum_vectors = np.sum([element.vector for element in self._elements], axis = 0)
-        return sum_vectors.mean(axis=0)
+        sum_vec = [0,0,0]
+        for element in self._elements:
+            sum_vec = np.add(sum_vec, element.vector)
+        return np.divide(sum_vec, len(self._elements))
 
     def __str__(self):
         return f"representative: {self._representative}, points: {[str(elem) for elem in self._elements]}"

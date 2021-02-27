@@ -13,23 +13,21 @@ from src.utils.labeled_point_list import LabeledPointList
 class ClusterList(Iterable):
     """High level class built to neatly manage a set of clusters"""
     def __init__(self, clusters: [LabeledPointList]):
-        self.clusters = np.array(clusters)
+        self.clusters = clusters
 
     def __iter__(self) -> Iterator[ClusterList]:
         for cluster in self.clusters:
             yield cluster
 
-    @property
     def clusters(self):
         return copy.deepcopy(self.clusters)
 
-    @property
     def representatives(self):
-        return [cluster.representative for cluster in self.clusters]
+        return [cluster.get_representative() for cluster in self.clusters]
 
     def get_cluster(self, cluster_representative: Any):
         """Returns first matching instance with identical cluster representative"""
-        matching = [cluster for cluster in self.clusters if cluster.representative == cluster_representative]
+        matching = [cluster for cluster in self.clusters if all(cluster.get_representative() == cluster_representative)]
         if len(matching) > 0:
             return matching[0]
         else:
@@ -65,11 +63,11 @@ class ClusterList(Iterable):
         closest = {'distance': None, 'centroid': None}
         for cluster in self.clusters:
             # Compute distance to each centroid
-            distance = point.distance(cluster.representative, distance)
+            current_distance = point.distance(LabeledPoint(cluster.get_representative(), 0), distance)
             # keep track of closest
             if (closest.get('distance') is None
-                    or distance < closest.get('distance')):
-                closest.update({'distance': distance, 'centroid': cluster.representative})
+                    or current_distance < closest.get('distance')):
+                closest.update({'distance': current_distance, 'centroid': cluster.get_representative()})
 
         # Remove from current cluster
         self.remove_point_from_cluster(point.label, point)
