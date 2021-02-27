@@ -1,6 +1,6 @@
 from typing import List, Any
 
-from python.src.models.utils.cost import Cost
+from src.utils.cost import Cost
 
 
 class GiniImpurity(Cost):

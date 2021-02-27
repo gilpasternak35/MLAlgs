@@ -2,8 +2,8 @@ from typing import Union
 
 import numpy as np
 
-from python.src.models.decision_tree.node import Node
-from python.src.models.utils.cost import Cost
+from src.models.supervised.classifier.decision_tree.node import Node
+from src.utils.cost import Cost
 
 
 class DecisionTree(object):
@@ -91,7 +91,3 @@ def synth_test():
     pred = tree.predict([[65, 180]])
     return tree
 
-
-if __name__ == "__main__":
-    t = synth_test()
-    print('pause')

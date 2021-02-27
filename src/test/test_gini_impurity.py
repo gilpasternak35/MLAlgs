@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from python.src.models.utils.gini_impurity import GiniImpurity
+from src.utils import GiniImpurity
 
 
 class TestGiniImpurity(TestCase):

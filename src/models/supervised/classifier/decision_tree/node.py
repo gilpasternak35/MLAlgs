@@ -7,7 +7,7 @@ from typing import Any, Union, Dict
 import numpy as np
 import scipy.stats as stats
 
-from python.src.models.utils.gini_impurity import GiniImpurity
+from src.utils import GiniImpurity
 
 log = logging.getLogger(__name__)
 
