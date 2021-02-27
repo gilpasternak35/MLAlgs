@@ -8,13 +8,14 @@ from src.models.supervised.classifier.knn.k_neighbors_classifier import \
 
 
 class TestKNeighborsClassifier(TestCase):
-    def test_fit(self):
-        pass
 
     def test_predict(self):
+        """Tests predict function"""
+        self._case_1()
         self._gender_test()
 
     def _case_1(self):
+        """Simple test case"""
         SMALL = 0
         BIG = 1
         # 0 is "small", 1 is "big"
@@ -42,6 +43,7 @@ class TestKNeighborsClassifier(TestCase):
         self.assertEqual(BIG, model.predict(test_big))
 
     def _gender_test(self):
+        """More complex test case"""
         import pandas as pd
         df = pd.read_csv('~/Documents/Projects/MLAlgs/SyntheticDataset.csv')
         features = df[['Weight(Pounds)']].to_numpy()

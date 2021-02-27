@@ -125,13 +125,27 @@ class KMeans(UnsupervisedBaseClassifier):
 
     def predict(self, data) -> np.ndarray:
         """Predict on new data"""
-        labeled_outputs = np.array([])
-        # If 1D array, returning single prediction
+        label_predictions = np.array([])
+
+        # If 1D array, nesting in array so as to traverse "once" and return single prediction
         if len(data.shape) == 1:
+            data = np.array([data])
+
         # Otherwise, traversing through vectors, creating point, and assigning
         else:
             for vector in data:
+                # Building labeled point
                 vector_as_point = LabeledPoint(vector, -1)
+
+                # Assigning vector to centroid
+                self.assign(vector_as_point, self._final_centroids)
+
+                # appending to label_predictions
+                label_predictions = np.append(label_predictions, vector_as_point.vector)
+
+        return label_predictions
+
+
 
 
 

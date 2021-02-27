@@ -7,9 +7,8 @@ from src.utils.cost import Cost
 
 
 class DecisionTree(object):
-    """Represents a randomly sampled decision tree algorithm
-
-        todo :: maybe rename to random decision tree
+    """
+    Represents a randomly sampled decision tree algorithm
     """
     _MIN_DEPTH = 3
 
@@ -43,6 +42,12 @@ class DecisionTree(object):
     def predict(self, data: np.ndarray) -> np.ndarray:
         """Traverses through tree and returns class prediction for every record"""
         predictions = []
+
+        # In case we are passed a single numpy array with hopes of prediction
+        if len(data.shape) == 1:
+            data = np.array([data])
+
+        # Appending class predictions to prediction array
         for record in data:
             predictions.append(self._root.predict_class(record))
 
