@@ -4,6 +4,7 @@ import numpy as np
 
 from src.models.unsupervised.unsupervised_base_classifier import \
     UnsupervisedBaseClassifier
+from src.utils.cluster_list import ClusterList
 from src.utils.distance import Distance
 from src.utils.euclidean_distance import Euclidean
 from src.utils.labeled_point import LabeledPoint
@@ -46,19 +47,13 @@ class KMeans(UnsupervisedBaseClassifier):
 
     def fit(self, point_set: Any) -> UnsupervisedBaseClassifier:
         """Fit the classifier to new data"""
-        # Data structure. Centroid labels are keys. Index by centroid,
-        # then ['centroid'] or ['cluster'] to get relevant data
-        # { label:
-        #         {
-        #         'centroid': LabeledPoint,
-        #         'cluster': LabeledPointList,
-        #     }
-        # }
 
         # Randomly initialize centroids as LabeledPoints
         # Builds a LabeledPointList named centroids
         generated_centroids = [LabeledPointList(representative=vec) for vec in
-                               point_set[np.random.choice(len(point_set), self._k_centroids)]]
+                                point_set[np.random.choice(len(point_set), self._k_centroids)]]
+
+        cluster_list = ClusterList()
 
         # Each centroid will have a cluster_list, represented by the centroid with data points as the elements
         centroid_cluster_list = np.array(generated_centroids)

@@ -38,3 +38,6 @@ class ClusterList:
     def set_cluster_representative_as_mean(self, cluster_representative):
         """Sets the cluster representative to be the mean of that cluster"""
         self.modify_cluster_representative(cluster_representative, self.compute_cluster_mean(cluster_representative))
+
+    def __str__(self):
+        return [str(cluster) for cluster in self.clusters]

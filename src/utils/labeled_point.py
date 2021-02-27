@@ -30,6 +30,7 @@ class LabeledPoint:
 
     @vector.setter
     def vector(self, new_vec: np.array) -> None:
+        """Setter for vector"""
         self._vector = new_vec
 
     @property
@@ -42,7 +43,13 @@ class LabeledPoint:
 
     @label.setter
     def label(self, new_label: Any):
+        """Setter for label"""
         self._label = new_label
 
     def distance(self, other_point: LabeledPoint, distance: Distance) -> float:
+        """Distance computation between two labeled points"""
         return distance.distance(self.vector, other_point.vector)
+
+    def __str__(self):
+        """String representation of a labeled point"""
+        return f"Vector: {self.vector}, label: {self._label}"
