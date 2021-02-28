@@ -2,5 +2,7 @@
 Machine Learning Algorithms implemented from scratch in Python, partner coded with @jsteinberg4.
 
 ### List of algorithms built so far:
-* Random Tree
+* Randomly Initialized Tree
   - Computational Metric for Gini Impurity
+* KNN Classifier
+* Unsupervised K-Means Clustering
