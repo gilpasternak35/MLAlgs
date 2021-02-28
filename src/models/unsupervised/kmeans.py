@@ -48,6 +48,8 @@ class KMeans(UnsupervisedBaseClassifier):
             # Obtaining previous representatives prior to update
             previous_representatives = cluster_list.representatives()
 
+            print(cluster_list.representatives())
+
             # Reassigning clusters
             self._update_centroids(cluster_list)
 
@@ -80,7 +82,7 @@ class KMeans(UnsupervisedBaseClassifier):
         label_predictions = np.array([])
 
         # If 1D array, nesting in array so as to traverse "once" and return single prediction
-        if len(data.shape) == 1:
+        if len(np.array(data).shape) == 1:
             data = np.array([data])
 
         # Otherwise, traversing through vectors, creating point, and assigning
@@ -89,7 +91,7 @@ class KMeans(UnsupervisedBaseClassifier):
                 # Building labeled point
                 vector_as_point = LabeledPoint(vector, -1)
 
-                # Computing proper centroid for labeledpoint
+                # Computing proper centroid for labeled point
                 self._final_cluster_list.assign_point_to_nearest_cluster(vector_as_point)
 
                 # appending representative by obtaining new label of point

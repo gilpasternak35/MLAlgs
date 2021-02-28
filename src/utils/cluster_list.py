@@ -52,7 +52,11 @@ class ClusterList(Iterable):
 
     def compute_cluster_mean(self, cluster_representative: Any):
         """Returns the mean of a cluster"""
-        return self.get_cluster(cluster_representative).vector_mean()
+        cluster = self.get_cluster(cluster_representative)
+        if cluster is not None:
+            return cluster.vector_mean()
+        else:
+            return 0
 
     def set_cluster_representative_as_mean(self, cluster_representative: Any):
         """Sets the cluster representative to be the mean of that cluster"""
