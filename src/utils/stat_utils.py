@@ -1,6 +1,5 @@
 import collections
 from typing import Iterable, Any, List
-import numpy as np
 
 
 def value_counts(values: Iterable[Any]) -> List[int]:
@@ -23,15 +22,9 @@ def mode(values: Iterable[Any], axis: int = 0):
     return max(value_counts(on_axis), key=lambda count: count[-1])[0]
 
 
-def vector_norms(vectors: np.array):
-    """Computes a list of vector norms for a list of vectors"""
-    norms = np.array([])
-    for vector in vectors:
-        norms = np.append(vector_norm(vector))
-    return norms
+def z_score():
+    pass
 
 
-def vector_norm(vector: np.array):
-    """Computes vector norm for an arbitrary vector"""
-    return np.divide(vector, np.sum(np.power(vector, 2)))
-
+def p_value():
+    pass
