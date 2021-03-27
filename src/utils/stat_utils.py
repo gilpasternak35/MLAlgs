@@ -35,3 +35,17 @@ def vector_norm(vector: np.array):
     """Computes vector norm for an arbitrary vector"""
     return np.divide(vector, np.sum(np.power(vector, 2)))
 
+
+def shuffle_data(input_vectors: np.ndarray):
+    """
+    Shuffles the order of an array of input vectors
+    Note: This should be a list of input vectors
+    """
+    np.random.shuffle(input_vectors)
+
+
+def predict_nearest_class(value: int, classes: np.array) -> int:
+    """Predicts nearest class from a list of classes"""
+    return min([value - chosen_class for chosen_class in classes])
+
+
