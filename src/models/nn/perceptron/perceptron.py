@@ -20,6 +20,12 @@ class Perceptron(BaseClassifier):
         # Tuple together features and labels
         data = np.array([(feature, label) for feature, label in zip(features, labels)])
 
+        # Unique classes
+        self._classes = np.unique(labels)
+
+        # Randomly initializing based on the length of the first feature vector
+        self._randomly_initialize_parameters(features.shape[-1])
+
         # Traversal through num_iterations
         for iteration in range(self.max_iter):
             # Shuffle
@@ -45,12 +51,12 @@ class Perceptron(BaseClassifier):
         self.bias_term += label
         self.weight_vector += label * feature
 
-    def randomly_initialize_parameters(self, num_features: int):
+    def _randomly_initialize_parameters(self, num_features: int):
         """Initializing bias to 0 and weights using uniform random number generator"""
         self.bias_term = 0
         self.weight_vector = np.array([np.random.uniform(0.001, 1) for i in range(num_features)])
 
-    def manually_initialize_parameters(self, weight_vector: np.array, bias_term: int):
+    def _manually_initialize_parameters(self, weight_vector: np.array, bias_term: int):
         """Manually initializing bias and weights"""
         self.weight_vector = weight_vector
         self.bias_term = bias_term
