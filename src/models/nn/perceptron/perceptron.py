@@ -1,4 +1,3 @@
-from abc import abstractmethod
 from typing import Any
 import numpy as np
 
@@ -9,7 +8,7 @@ from src.utils.stat_utils import predict_nearest_class, shuffle_data
 class Perceptron(BaseClassifier):
     """Perceptron Base Class - partial functionality"""
 
-    def __init__(self, max_iter: int):
+    def __init__(self, max_iter: int = 30):
         super().__init__()
         self.max_iter = max_iter
         self.weight_vector = None
