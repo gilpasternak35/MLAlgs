@@ -6,3 +6,4 @@ Machine Learning Algorithms implemented from scratch in Python, partner coded wi
   - Computational Metric for Gini Impurity
 * KNN Classifier
 * Unsupervised K-Means Clustering
+* Averaged Perceptron
