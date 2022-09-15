@@ -1,76 +1,69 @@
-from __future__ import annotations
-
+import pandas as pd
+import numpy as np
+import statistics as stats
+from logging import getLogger
 from typing import Union
 
-import numpy as np
+logger = getLogger()
 
-from src.models.supervised.classifier.base_classifier import BaseClassifier
-from src.utils import stat_utils
-from src.utils.distance import Distance
-from src.utils.euclidean_distance import Euclidean
-
-
-class KNeighborsClassifier(BaseClassifier):
-    """A k-Nearest Neighbors classifier.
-
-    INVARIANT: self._neighbors % 2 != 0
-    """
-    DISTANCES = {
-        'euclidean': Euclidean.distance,
-    }
-
-    def __init__(self, k: int = 5, distance: Union[str,
-                                                   Distance] = 'euclidean'):
-        """Initializes a new KNeighborsClassifier with k=`k` and given distance
-        metric
-        TODO :: params, raises
+class KNN_Classifier:
+    
+    def __init__(self, k: int):
         """
-        # TODO :: Check that k is not a bad value
-        if k % 2 == 0:
-            raise ValueError(f'Even values of k ({k}) do not allow majority '
-                             f'rule.')
-        self._neighbors = k
-        self._distance = (distance if isinstance(distance, Distance)
-                          else self.DISTANCES.get(distance, 'euclidean'))
-
-        self._features = None
-        self._labels = None
-
-    def fit(self, features: np.ndarray, labels: np.ndarray) \
-            -> KNeighborsClassifier:
-        """Save instance data"""
-        # TODO :: if problems during prediction, check here to see if labels
-        #  and data are mapped incorrectly
-        assert features.shape[0] == labels.shape[-1]
-        self._features = features
-        self._labels = labels
-        return self
-
-    def predict(self, data: np.ndarray):
-        # Feature space R^D
-        # Given N features of shape D
-        # For each feature, compute dist(feature,
-        # If columns match, number of features match
-        assert data.shape[-1] == self._features.shape[-1]
-
-        if len(data.shape) == 1:
-           data = np.array([data.tolist()])
-
-        predictions = np.array([])
-        for record in data:
-            # 1: Compute distance between this record (1 vector of D
-            #     features) and every training feature. Store.
-            distances = [(self._distance(record, feature), label)
-                         for feature, label in zip(self._features,
-                                                   self._labels)]
-            # 2: Sort by distance.
-            distances.sort(key=lambda dist_tup: dist_tup[0])
-
-            # 3: Take majority vote of k-closest
-            predictions = np.append(predictions,
-                                    stat_utils.mode(
-                                        distances[:self._neighbors], axis=1))
-
-        return (int(predictions[0]) if len(predictions) == 1
-                else list(map(int, predictions)))
-
+        A constructor initializing the number of examples to be used for classification
+        """
+        # Ensuring k is an int and odd to allow for majority, and that k > 0
+        assert (isinstance(k, int) 
+                and (k % 2 != 0) 
+                and k > 0), "Please ensure the value of k is an even, positive integer"
+        
+        self.k_examples = k
+        
+    
+    def fit(self, data: pd.DataFrame):
+        """
+        A Model fitting, consisting of simply storing the data
+        
+        @param data: A Pandas DataFrame consisting of the data the model maintains
+        """
+        self.data = data
+        
+    def __str__(self):
+        """String representation of model"""
+        return f"KNN Model with data: \n{data}"
+    
+    
+    def predict(self, example: pd.Series) -> Union[int, str, bool, float]:
+        """
+        Classifies an example based with KNN Algorithm based on initialized k. 
+        
+        Explicitly assumes labels are the index of both of the series and the data
+        
+        @param example: An example to classify
+        @returns a primitive representing the predicted label
+        """
+        # Warning of assumption in debug mode
+        logger.warning("Warning: Assuming label is index (for simplicity of computation)")
+        
+        # Computing distances
+        distances = (self.data.apply
+                    (self.__euclidian_distance, 
+                     vec2 = example, 
+                     axis=1))
+        
+        # Sorting distances
+        distances.sort_values(inplace=True)
+        
+        # Finding k most commmon labels
+        k_most_common_labels = np.array(distances.index[0:self.k_examples])
+        
+        # Returning mode of array
+        return stats.mode(k_most_common_labels)
+        
+        
+    
+    @staticmethod
+    def __euclidian_distance(vec1: pd.Series, vec2: pd.Series) -> float:
+        """l2 distance computation"""
+        return np.sqrt(np.sum(np.power(vec1-vec2, 2)))
+    
